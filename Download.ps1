@@ -2,11 +2,6 @@
 Clear-Host
 $Counter = 0
 
-# Welcome banner
-Write-Host "******************************" -ForegroundColor Magenta
-Write-Host "** Sophos uninstall script. **" -ForegroundColor Magenta
-Write-Host "******************************`n`n`n" -ForegroundColor Magenta
-
 # SMB connection details
 $smbServer = "\\192.168.2.24\wukits"
 $smbUsername = "simon"
