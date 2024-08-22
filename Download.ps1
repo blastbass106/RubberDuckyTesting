@@ -23,18 +23,8 @@ New-PSDrive -Name "Z" -PSProvider "FileSystem" -Root $smbServer -Credential $cre
 # Your PowerShell script commands here
 $destinationPath = "C:\Users\SimonWukits\Documents\Gather_Info.ps1"
 
-if (Test-Path $destinationPath) {
-    # File already exists, prompt for confirmation
-    $overwrite = Read-Host -Prompt "File already exists. Overwrite? (y/n)"
-    if ($overwrite -eq 'y') {
-        Copy-Item -Path "Z:\Scripts\Gather_Info.ps1" -Destination $destinationPath -Force
-    } else {
-        Write-Host "File not overwritten."
-    }
-} else {
-    # File doesn't exist, copy directly
-    Copy-Item -Path "Z:\Scripts\Gather_Info.ps1" -Destination $destinationPath
-}
+Copy-Item -Path "Z:\Scripts\Gather_Info.ps1" -Destination $destinationPath -Force
+
 
 # Get the current execution policy
 $executionPolicy = Get-ExecutionPolicy
