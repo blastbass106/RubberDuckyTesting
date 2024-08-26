@@ -1,12 +1,8 @@
-﻿# Housekeeping
-Clear-Host
-$Counter = 0
-
-# SMB connection details
+﻿# SMB connection details
 $smbServer = "\\192.168.2.24\wukits"
 $smbUsername = "simon"
 $smbPassword = "Frankfurt.12345"
-$localFilePath = "$env:USERPROFILE\Downloads\output_filename.txt" 
+$localFilePath = "$env:USERPROFILE\Downloads\output_filename.txt"
 $remoteFilePath = "$smbServer\output_file.txt"
 
 # Create network credential object
@@ -32,4 +28,4 @@ if ($executionPolicy -eq "Restricted") {
 }
 
 # Execute the downloaded script
-& $destinationPath 
+& $destinationPath
