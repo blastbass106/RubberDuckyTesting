@@ -1,15 +1,3 @@
-# Get the system locale
-$systemLocale = Get-WinSystemLocale
-
-# Set the keyboard layout to match the system locale
-try {
-    $layout = New-WinUserLanguageList -Language $systemLocale.Name 
-    Set-WinUserLanguageList $layout -Force
-    Write-Host "Keyboard layout set to $($systemLocale.DisplayName)"
-} catch {
-    Write-Error "Error setting keyboard layout: $($_.Exception.Message)"
-}
-
 # Output File Path
 $outputFilePath = "$env:USERPROFILE\Downloads\System_Info.txt"
 
