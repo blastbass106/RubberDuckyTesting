@@ -1,11 +1,11 @@
 # Google Drive Configuration (Replace with your actual details)
-$googleDriveFolderId = "YOUR_GOOGLE_DRIVE_FOLDER_ID" 
-$scriptFileId = "YOUR_SCRIPT_FILE_ID"
+$googleDriveFolderId = "https://drive.google.com/drive/u/0/folders/1IlASN8C4ocFjCmLwagRQxagDHwb9ZbNx" 
+$scriptFileId = "https://drive.google.com/file/d/1Huybhepaau4RKx2yrKdKDzPDTq4-Ba-i/view?usp=sharing"
 
 # Local Paths
 $downloadedFilePath = "$env:USERPROFILE\Downloads\Gather_Info.ps1"
 $destinationPath = "C:\Users\SimonWukits\Documents\Gather_Info.ps1"
-$resultFilePath = "PATH_TO_THE_RESULT_FILE_GENERATED_BY_THE_SCRIPT" # Update this with the actual path
+$resultFilePath = "$env:USERPROFILE\Documents\system_info.txt" # Update this with the actual path
 
 # Download the Script from Google Drive
 try {
