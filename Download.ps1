@@ -1,7 +1,7 @@
 ﻿# SMB connection details
-$smbServer = "\\192.168.2.24\wukits"
-$smbUsername = "simon"
-$smbPassword = "Frankfurt.12345"
+$smbServer = "xxx"
+$smbUsername = "xxx"
+$smbPassword = "xxx"
 $localFilePath = "$env:USERPROFILE\Downloads\output_filename.txt"
 $remoteFilePath = "$smbServer\output_file.txt"
 
@@ -12,7 +12,7 @@ $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $smbU
 New-PSDrive -Name "Z" -PSProvider "FileSystem" -Root $smbServer -Credential $cred -Persist
 
 # Your PowerShell script commands here
-$destinationPath = "C:\Users\SimonWukits\Documents\Gather_Info.ps1"
+$destinationPath = "C:\Users\xxx\Documents\Gather_Info.ps1"
 
 Copy-Item -Path "Z:\Scripts\Gather_Info.ps1" -Destination $destinationPath -Force
 
